@@ -48,6 +48,8 @@ python = use_extension("@rules_python//python/extensions:python.bzl", "python")
 # We also use the same name for python.host_python_interpreter.
 PYTHON_NAME = "python3"
 
+PYTHON_TOOLCHAINS = PYTHON_NAME + "_toolchains"
+
 # We next initialize the python toolchain using the extension.
 # You can set different Python versions in this block.
 python.toolchain(
@@ -63,12 +65,12 @@ python.toolchain(
 # into the scope of the current module.
 # All of the python3 repositories use the PYTHON_NAME as there prefix.  They
 # are not catenated for ease of reading.
-use_repo(python, PYTHON_NAME, "python3_toolchains")
+use_repo(python, PYTHON_NAME, PYTHON_TOOLCHAINS)
 
 # Register an already-defined toolchain so that Bazel can use it during
 # toolchain resolution.
 register_toolchains(
-    "@python3_toolchains//:all",
+    "@{}//:all".format(PYTHON_TOOLCHAINS),
 )
 
 # The interpreter extension discovers the platform specific Python binary.
