@@ -231,6 +231,8 @@ def entry_point(pkg, script = None):
 def install_deps(**whl_library_kwargs):
 {install_deps_calls}
     for wheel_name in _wheel_names:
+        print(wheel_name)
+        print(_version_map[wheel_name])
         whl_library_alias(
             name = "{name}_" + wheel_name,
             wheel_name = wheel_name,

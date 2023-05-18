@@ -19,12 +19,19 @@ load("//python/private:toolchains_repo.bzl", "get_host_os_arch", "get_host_platf
 
 _build_file_for_hub_template = """
 INTERPRETER_LABELS = {{
-{lines}
+{label_lines}
 }}
+INTERPRETER_VERSIONS = {{
+{version_lines}
+}}
+DEFAULT_INTERPRETER_VERSION = {default_version}
 """
 
 _line_for_hub_template = """\
     "{name}": Label("@{name}_{platform}//:{path}"),
+"""
+_version_line_for_hub_template = """\
+    Label("@{name}_{platform}//:{path}") : {version},
 """
 
 def _hub_repo_impl(rctx):
@@ -35,13 +42,24 @@ def _hub_repo_impl(rctx):
     is_windows = (os == WINDOWS_NAME)
     path = "python.exe" if is_windows else "bin/python3"
 
-    lines = "\n".join([_line_for_hub_template.format(
+    label_lines = "\n".join([_line_for_hub_template.format(
         name = name,
         platform = platform,
         path = path,
-    ) for name in rctx.attr.toolchains])
+    ) for name in rctx.attr.toolchains.keys()])
 
-    rctx.file("interpreters.bzl", _build_file_for_hub_template.format(lines = lines))
+    version_lines = "\n".join([_version_line_for_hub_template.format(
+        platform = platform,
+        path = path,
+    ) for name, version in rctx.attr.toolchains])
+
+    content = _build_file_for_hub_template.format(
+                label_lines = label_lines, 
+                version_lines = version_lines, 
+                default_version = rctx.default_version,
+            )
+
+    rctx.file("interpreters.bzl", content)
 
 hub_repo = repository_rule(
     doc = """\
@@ -50,8 +68,12 @@ and the labels to said interpreters. This map is used to by the interpreter hub 
 """,
     implementation = _hub_repo_impl,
     attrs = {
-        "toolchains": attr.string_list(
-            doc = "List of the base names the toolchain repo defines.",
+        "toolchains": attr.string_dict(
+            doc = "A dictionary of toolchain names and their python version",
+            mandatory = True,
+        ),
+        "default_version": attr.string(
+            doc = "The default python version",
             mandatory = True,
         ),
     },

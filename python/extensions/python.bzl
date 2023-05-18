@@ -36,7 +36,7 @@ def _python_impl(module_ctx):
     # We collect all of the toolchain names to create
     # the INTERPRETER_LABELS map.  This is used
     # by interpreter_extensions.bzl via the hub_repo call below.
-    toolchain_names = []
+    toolchain_map = {}
 
     # Used to store the default toolchain so we can create it last.
     default_toolchain = None
@@ -49,7 +49,7 @@ def _python_impl(module_ctx):
             # If we are in the root module we always register the toolchain.
             # We wait to register the default toolchain till the end.
             if mod.is_root:
-                toolchain_names.append(toolchain_attr.name)
+                toolchain_map[toolchain_attr.name] = toolchain_attr.python_version
 
                 # If we have the default version or we only have one toolchain
                 # in the root module we set the toolchain as the default toolchain.
@@ -88,12 +88,12 @@ in a sub module and defalult_version is set to True.""".format(name))
 
         # We cannot have a toolchain in a sub module that has the same name of
         # a toolchain in the root module. This will cause name clashing.
-        if name in toolchain_names:
+        if name in toolchain_map.keys():
             _print_warn("""Not creating the toolchain from sub module, with the name {}. The root
  modhas a toolchain of the same name.""".format(toolchain_attr.name))
             continue
-        toolchain_names.append(name)
         _python_register_toolchains(toolchain_attr, True)
+        toolchain_map[toolchain_attr.name] = toolchain_attr.python_version
 
     # We register the default toolchain last.
     _python_register_toolchains(default_toolchain, False)
@@ -101,7 +101,8 @@ in a sub module and defalult_version is set to True.""".format(name))
     # Create the hub for the different interpreter versions.
     hub_repo(
         name = "pythons_hub",
-        toolchains = toolchain_names,
+        toolchains = toolchain_map,
+        default_toolchain = { "name": default_toolchain.name, "version": default_toolchain.python_version },
     )
 
 python = module_extension(
