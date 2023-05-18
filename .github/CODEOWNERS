@@ -11,5 +11,12 @@
 /python/private/toolchains_repo.bzl @f0rmiga
 /python/tests/toolchains/ @f0rmiga
 
+# bzlmod
+/python/extensions/* @chrislovecnm
+/BZLMOD_SUPPORT.md @chrislovecnm
+
+# Examples
+/examples/* @chrislovecnm
+
 # pip_parse related code
 /python/pip_install/ @hrfuller
