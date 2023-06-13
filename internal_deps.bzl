@@ -53,9 +53,11 @@ def rules_python_internal_deps():
     maybe(
         http_archive,
         name = "io_bazel_stardoc",
-        url = "https://github.com/bazelbuild/stardoc/archive/6f274e903009158504a9d9130d7f7d5f3e9421ed.tar.gz",
-        sha256 = "b5d6891f869d5b5a224316ec4dd9e9d481885a9b1a1c81eb846e20180156f2fa",
-        strip_prefix = "stardoc-6f274e903009158504a9d9130d7f7d5f3e9421ed",
+        urls = [
+            "https://mirror.bazel.build/github.com/bazelbuild/stardoc/releases/download/0.5.6/stardoc-0.5.6.tar.gz",
+            "https://github.com/bazelbuild/stardoc/releases/download/0.5.6/stardoc-0.5.6.tar.gz",
+        ],
+        sha256 = "dfbc364aaec143df5e6c52faf1f1166775a5b4408243f445f44b661cfdc3134f",
     )
 
     # The below two deps are required for the integration test with bazel

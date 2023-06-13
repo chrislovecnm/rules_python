@@ -22,6 +22,7 @@ package(default_visibility = ["//visibility:public"])
 licenses(["notice"])  # Apache 2.0
 
 _DOCS = {
+    "bzlmod-pip": "//docs:bzlmod-pip-docs",
     "packaging": "//docs:packaging-docs",
     "pip": "//docs:pip-docs",
     "pip_repository": "//docs:pip-repository",
@@ -92,6 +93,18 @@ _NOT_WINDOWS = select({
     "@platforms//os:macos": [],
     "//conditions:default": ["@platforms//:incompatible"],
 })
+
+stardoc(
+    name = "bzlmod-pip-docs",
+    out = "bzlmod-pip.md_",
+    input = "//python/extensions:pip.bzl",
+    target_compatible_with = _NOT_WINDOWS,
+    deps = [
+        ":bazel_repo_tools",
+        ":pip_install_bzl",
+        "@bazel_skylib//lib:versions",
+    ],
+)
 
 stardoc(
     name = "core-docs",
