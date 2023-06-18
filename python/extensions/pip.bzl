@@ -27,7 +27,7 @@ load(
 )
 load("@rules_python//python/pip_install:requirements_parser.bzl", parse_requirements = "parse")
 
-def _create_pip(module_ctx, pip_attr, whl_map):
+def _create_pip(module_ctx, pip_attr, whl_map, ctx):
     python_interpreter_target = pip_attr.python_interpreter_target
 
     # if we do not have the python_interpreter set in the attributes
@@ -68,13 +68,16 @@ Unable to find '{}' in the list of interpreters please update your pip.parse cal
 
     # Create a new wheel library for each of the different whls
     for whl_name, requirement_line in requirements:
+        annotation = None 
+        if whl_name in pip_attr.annotations.keys():
+            annotation = pip_attr.annotations[whl_name]
         whl_name = _sanitize_name(whl_name)
         whl_library(
             name = "%s_%s" % (pip_name, whl_name),
             requirement = requirement_line,
             repo = pip_name,
             repo_prefix = pip_name + "_",
-            annotation = pip_attr.annotations.get(whl_name),
+            annotation = annotation,
             python_interpreter = pip_attr.python_interpreter,
             python_interpreter_target = python_interpreter_target,
             quiet = pip_attr.quiet,
@@ -113,7 +116,6 @@ def _pip_impl(module_ctx):
         requirements_lock = "//:requirements_lock_3_10.txt",
         requirements_windows = "//:requirements_windows_3_10.txt",
     )
-
 
     For instance we have a hub with the name of "pip".
     A repository named the following is created. It is actually called last when
@@ -209,7 +211,7 @@ def _pip_impl(module_ctx):
                     python_versions = [pip_attr.python_version],
                 )
 
-            _create_pip(module_ctx, pip_attr, hub_whl_map)
+            _create_pip(module_ctx, pip_attr, hub_whl_map, module_ctx)
 
     for hub_name, whl_map in hub_whl_map.items():
         for whl_name, version_map in whl_map.items():
